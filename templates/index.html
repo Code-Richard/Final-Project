@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>News</title>
+    </head>
+
+    <body>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Source</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr>
+                    <td>{{article['title']}}</td>
+                    <td>{{article['description']}}</td>
+                    <td>{{article['source']}}</td>
+                    <td>{{article['link']}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table> 
+    </body>
+</html>
