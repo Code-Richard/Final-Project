@@ -9,8 +9,9 @@ app = Flask(__name__)
 @app.route("/")
 def index():
 
+    # Gets page for specific article
     ticker = "FB"
-    url = f"https://finance.yahoo.com/quote/{ticker}/"
+    url = f"https://finance.yahoo.com/quote/{ticker}"
     result = requests.get(url)
     doc = BeautifulSoup(result.text, "html.parser")
 
@@ -28,10 +29,12 @@ def index():
         description = title.next_sibling
 
         # Adding article to dictionary
+        temp_dict['stock'] = ticker
         temp_dict['title'] = title.text
         temp_dict['description'] = description.text
         temp_dict['source'] = source.text
-        temp_dict['link'] = link
+        temp_dict['link'] = url+link
+
 
         # Adding dictionary to list
         articles_list.append(temp_dict.copy())
