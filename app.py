@@ -1,21 +1,17 @@
 from flask import Flask
-from flask import redirect, render_template
+from flask import redirect, render_template, request, redirect
 from bs4 import BeautifulSoup
 from random import shuffle
 import requests
 import re
 
 app = Flask(__name__)
-
+articles_list = []
+tickers = set()
 @app.route("/")
 def index():
-
-    # List generate by user
-    tickers = ['AAPL','FB','TSLA']
-    # Creates a list of empty dictionaries to store article data on each stock
-    articles_list = []
-
     
+    # Creates a list of empty dictionaries to store article data on each stock
     for ticker in tickers:
         # Gets page for specific article
         url = f"https://finance.yahoo.com/quote/{ticker}"
@@ -47,3 +43,13 @@ def index():
     shuffle(articles_list)
 
     return render_template("index.html", articles=articles_list)
+
+
+@app.route("/add", methods=["GET", "POST"])
+def add():
+    if request.method == "POST":
+        stock = request.form.get('stock')
+        tickers.add(stock)
+        return redirect("/add")
+    else:
+        return render_template("add.html")
