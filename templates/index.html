@@ -28,7 +28,7 @@
                     <a class="nav-link active" aria-current="page" href="/add">Stocks</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#">Read Later</a>
+                    <a class="nav-link" href="/readlater">Read Later</a>
                   </li>
                 </ul>
               </div>
@@ -45,6 +45,9 @@
                         <h5 class="card-title">{{article['title']}}</h5>
                         <p class="card-text">{{article['description']}}</p>
                         <a href={{article['link']}} class="btn btn-outline-light">Read Article</a>
+                        <form action="/" method="POST">
+                            <button type="submit" name=article_id value={{article['id']}} class="btn btn-outline-light m-3">Read Later</button>
+                        </form>
                     </div>
                     <div class="card-footer text-muted">
                     {{article['source']}}
