@@ -36,7 +36,6 @@ def index():
                 temp_dict['description'] = description.text
                 temp_dict['source'] = source.text
                 temp_dict['link'] = url+link
-                print(count)
                 temp_dict['id'] = count
 
                 # Adding dictionary to list
@@ -53,8 +52,7 @@ def index():
             if article['id'] == article_number:
                 print(article['id'])
                 read_later.append(article)
-            
-            
+                break
         return redirect("/readlater")
 
 
@@ -69,7 +67,18 @@ def add():
         return render_template("add.html")
 
 
-@app.route("/readlater")
+@app.route("/readlater", methods=["POST","GET"])
 def readlater():
-    return render_template("readlater.html", read_later=read_later)
+    if request.method=="POST":
+        article_id = int(request.form.get("article_id"))
+        for article in articles_list:
+            if article['id'] == article_id:
+                print(read_later)
+                print(article_id)
+                read_later.remove(article)
+                print(read_later)
+                break
+        return redirect("/readlater")
+    else:
+        return render_template("readlater.html", read_later=read_later)
         
