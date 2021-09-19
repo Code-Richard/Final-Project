@@ -6,14 +6,19 @@ import requests
 import re
 
 app = Flask(__name__)
+
 articles_list = []
 read_later = []
+MAX_ARTICLES = 5
 tickers = set()
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "GET":
-        articles_list.clear
+        articles_list.clear()
         for ticker in tickers:
+            # Sets limit for number of articles
+            limit = 0
             # Gets page for specific article
             url = f"https://finance.yahoo.com/quote/{ticker}"
             result = requests.get(url)
@@ -24,6 +29,12 @@ def index():
 
             # Stores info about each article in articles_list
             for count, article in enumerate(articles, start=(len(articles_list))):
+
+                # Sets max number of articles per company
+                limit += 1
+                if limit >= MAX_ARTICLES:
+                    break
+
                 # Accessing HTML elements
                 temp_dict = {}
                 source = article.find(class_="C(#959595) Fz(11px) D(ib) Mb(6px)")
