@@ -37,7 +37,7 @@
         
         <div class="container">
             {% for article in read_later %}
-                <div class="card text-center shadow text-white bg-dark m-3">
+                <div class="card text-center shadow text-dark bg-light m-3">
                     <div class="card-header">
                     {{article['stock']}}
                     </div>
@@ -45,9 +45,9 @@
                         <h5 class="card-title">{{article['title']}}</h5>
                         <p class="card-text">{{article['description']}}</p>
                         <div class="row justify-content-center">
-                          <a href={{article['link']}} class="btn btn-outline-light m-2">Read Article</a>
+                          <a href={{article['link']}} class="btn btn-outline-dark shadow m-2">Read Article</a>
                           <form action="/readlater" method="POST">
-                              <button type="submit" name=article_id value={{article['id']}} class="btn btn-outline-light m-2">Remove</button>
+                              <button type="submit" name=article_id value={{article['id']}} class="btn btn-outline-dark shadow m-2">Remove</button>
                           </form>
                       </div>
                     </div>

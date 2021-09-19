@@ -12,6 +12,7 @@ tickers = set()
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "GET":
+        articles_list.clear
         for ticker in tickers:
             # Gets page for specific article
             url = f"https://finance.yahoo.com/quote/{ticker}"
@@ -58,16 +59,21 @@ def index():
 @app.route("/add", methods=["GET", "POST"])
 def add():
     # Adds users stock into feed
-    if request.method == "POST":
-        stock = request.form.get('stock').upper()
+    if request.method == "POST" and request.form.get('stock_add'):
+        stock = request.form.get('stock_add').upper()
         tickers.add(stock)
         return redirect("/add")
+    elif request.method == "POST" and request.form.get('stock_removal'):
+        stock = request.form.get('stock_removal').upper()
+        tickers.remove(stock)
+        return redirect("/add")
     else:
-        return render_template("add.html")
+        return render_template("add.html", tickers=tickers)
 
 
 @app.route("/readlater", methods=["POST","GET"])
 def readlater():
+    # Removes article from read later
     if request.method=="POST":
         article_id = int(request.form.get("article_id"))
         for article in articles_list:
