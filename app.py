@@ -44,7 +44,7 @@ def index():
         #Randomises feed
         shuffle(articles_list)
 
-        return render_template("index.html", articles=articles_list)
+        return render_template("index.html", articles=articles_list, tickers=tickers)
     else:
         # Adds article to read_later list
         article_number = int(request.form.get('article_id'))
