@@ -50,7 +50,6 @@ def index():
         article_number = int(request.form.get('article_id'))
         for article in articles_list:
             if article['id'] == article_number:
-                print(article['id'])
                 read_later.append(article)
                 break
         return redirect("/readlater")
@@ -73,10 +72,7 @@ def readlater():
         article_id = int(request.form.get("article_id"))
         for article in articles_list:
             if article['id'] == article_id:
-                print(read_later)
-                print(article_id)
                 read_later.remove(article)
-                print(read_later)
                 break
         return redirect("/readlater")
     else:
