@@ -34,28 +34,47 @@
               </div>
             </div>
         </nav>
-        
-        <div class="container">
-            {% for article in articles %}
-                <div class="card text-center shadow text-white bg-dark m-3">
-                    <div class="card-header">
-                    {{article['stock']}}
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{article['title']}}</h5>
-                        <p class="card-text">{{article['description']}}</p>
-                        <div class="row justify-content-center">
-                            <a href={{article['link']}} class="btn btn-outline-light m-2">Read Article</a>
-                            <form action="/" method="POST">
-                                <button type="submit" name=article_id value={{article['id']}} class="btn btn-outline-light m-2">Read Later</button>
-                            </form>
+        <div class="row">
+            <div class="container-fluid col-sm-3 justify-content-center p-3 text-white shadow min-vh-100" style="background-color:black; text-align: center;">
+                <h2>Your Portfolio</h2>
+                <div class="card-footer text-muted font-italic">Add or remove companies from the "stocks" tab</div>
+                <hr style="background-color: whitesmoke;">
+                {% for ticker in tickers %}
+                <div class="p-1">
+                    <h5>{{ticker}}</h5>
+                </div>  
+                {% endfor %}
+            </div>
+            <div class="container col-sm-9">
+                {% if articles %}
+                    {% for article in articles %}
+                        <div class="card text-center shadow text-dark bg-light m-3">
+                            <div class="card-header">
+                            {{article['stock']}}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{article['title']}}</h5>
+                                <p class="card-text">{{article['description']}}</p>
+                                <div class="row justify-content-center">
+                                    <a href={{article['link']}} class="btn btn-outline-dark m-2 shadow">Read Article</a>
+                                    <form action="/" method="POST">
+                                        <button type="submit" name=article_id value={{article['id']}} class="btn btn-outline-dark m-2 shadow">Read Later</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="card-footer text-muted">
+                            {{article['source']}}
+                            </div>
+                        </div>  
+                    {% endfor %}
+                {% else %}
+                    <div class="container m-3">
+                        <div class="justify-content-center font-italic font-weight-lighter" style="text-align: center; color: white;">
+                            Your Portfolio is empty - Add companies in the "stocks" tab
                         </div>
                     </div>
-                    <div class="card-footer text-muted">
-                    {{article['source']}}
-                    </div>
-                </div>  
-            {% endfor %}
+                {% endif %}
+            </div>
         </div>
     </body>
 </html>
