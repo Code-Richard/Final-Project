@@ -1,5 +1,8 @@
 from flask import Flask
 from flask import redirect, render_template, request, redirect
+import mysql.connector
+from mysql.connector import Error
+import yaml
 from bs4 import BeautifulSoup
 from random import shuffle
 import requests
@@ -7,6 +10,24 @@ import re
 
 app = Flask(__name__)
 
+# Configure db
+db = yaml.load(open('db.yaml'))
+
+connection = mysql.connector.connect(host=db['mysql_host'],
+                                         database=db['mysql_db'],
+                                         user=db['mysql_user'],
+                                         password= db['mysql_password'])
+
+cur = connection.cursor()
+cur.execute("INSERT INTO news.test(id, ticker) VALUES (1, 'TSLA')")
+connection.commit()
+cur.execute("SELECT * FROM test")
+result = cur.fetchall()
+
+for x in result:
+    print(x)
+
+# Defining some global variables
 articles_list = []
 read_later = []
 MAX_ARTICLES = 5
@@ -94,4 +115,6 @@ def readlater():
         return redirect("/readlater")
     else:
         return render_template("readlater.html", read_later=read_later)
-        
+
+if __name__== '__main__':
+    app.run(debug=True)
