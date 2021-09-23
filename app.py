@@ -5,12 +5,14 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
 from tempfile import mkdtemp
 import mysql.connector
+from functools import wraps
 from mysql.connector import Error
 import yaml
 from bs4 import BeautifulSoup
 from random import shuffle
 import requests
 import re
+
 
 app = Flask(__name__)
 
@@ -42,12 +44,33 @@ app.config["SESSION_TYPE"] = "filesystem"
 
 Session(app)
 
-
 # Defining some global variables
 articles_list = []
 read_later = []
 MAX_ARTICLES = 5
 tickers = set()
+
+def login_required(f):
+    """
+    Decorate routes to require login.
+
+    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_tickers():
+     # Gets tickers held by user
+        cur.execute("SELECT ticker FROM tickers WHERE user_id = %s", (session['user_id'],))
+        results_temp = cur.fetchall()
+        tckrs = []
+        for index, result in enumerate(results_temp):
+            tckrs.append(result[0])
+        return tckrs
 
 @app.route("/register", methods=["GET", "POST"])
 #"""Register user"""
@@ -79,13 +102,12 @@ def register():
         if username in taken_usernames_list:
             return("Username already taken")
         
+        # Insert user into database
         sql = "INSERT INTO users (username, hash) VALUES (%s, %s)"
         val = (username, generate_password_hash(password))
         cur.execute(sql, val)
-        print(cur.rowcount, "record inserted.")
         connection.commit()
         cur.close()
-
         return redirect("/")
     else:
         return render_template("register.html")
@@ -99,17 +121,19 @@ def login():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
+        
+        username = request.form.get('username')
+        password = request.form.get('password')
         # Ensure username was submitted
-        if not request.form.get("username"):
+        if not username:
             return ("must provide username")
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
+        elif not password:
             return ("must provide password")
 
         # Query database for username
-        cur.execute("SELECT * FROM users WHERE username = %s", (request.form.get('username'),))
+        cur.execute("SELECT * FROM users WHERE username = %s", (username,))
 
         # Stores details of user
         usernames = cur.fetchall()
@@ -128,7 +152,6 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = usernames_list[0]["ID"]
-
         # Redirect user to home page
         return redirect("/")
 
@@ -137,9 +160,12 @@ def login():
         return render_template("login.html")
 
 @app.route("/", methods=["GET", "POST"])
+@login_required
 def index():
     if request.method == "GET":
+
         articles_list.clear()
+        tickers = get_tickers()
         for ticker in tickers:
             # Sets limit for number of articles
             limit = 0
@@ -192,21 +218,29 @@ def index():
 
 
 @app.route("/add", methods=["GET", "POST"])
+@login_required
 def add():
+    
     # Adds users stock into feed
     if request.method == "POST" and request.form.get('stock_add'):
         stock = request.form.get('stock_add').upper()
-        tickers.add(stock)
+        cur.execute("INSERT INTO tickers(user_id, ticker) VALUES(%s, %s)", (session['user_id'], stock))
+        connection.commit()
         return redirect("/add")
+
     elif request.method == "POST" and request.form.get('stock_removal'):
         stock = request.form.get('stock_removal').upper()
-        tickers.remove(stock)
+
+        cur.execute("DELETE FROM tickers WHERE user_id = %s and ticker = %s", (session['user_id'], stock))
+        connection.commit()
+
         return redirect("/add")
     else:
-        return render_template("add.html", tickers=tickers)
+        return render_template("add.html", tickers=get_tickers())
 
 
 @app.route("/readlater", methods=["POST","GET"])
+@login_required
 def readlater():
     # Removes article from read later
     if request.method=="POST":
