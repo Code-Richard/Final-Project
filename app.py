@@ -1,5 +1,9 @@
+import os
 from flask import Flask
-from flask import redirect, render_template, request, redirect
+from flask import redirect, render_template, request, redirect, session
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask_session import Session
+from tempfile import mkdtemp
 import mysql.connector
 from mysql.connector import Error
 import yaml
@@ -10,28 +14,127 @@ import re
 
 app = Flask(__name__)
 
+# Ensure templates are auto-reloaded
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
 # Configure db
 db = yaml.load(open('db.yaml'))
-
 connection = mysql.connector.connect(host=db['mysql_host'],
                                          database=db['mysql_db'],
                                          user=db['mysql_user'],
-                                         password= db['mysql_password'])
+                                         password= db['mysql_password'],
+                                         autocommit=True)
 
 cur = connection.cursor()
-cur.execute("INSERT INTO news.test(id, ticker) VALUES (1, 'TSLA')")
-connection.commit()
-cur.execute("SELECT * FROM test")
-result = cur.fetchall()
 
-for x in result:
-    print(x)
+# Make sure responses are not cached (from CS50 finance)
+@app.after_request
+def after_request(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_FILE_DIR"] = mkdtemp()
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+
+Session(app)
+
 
 # Defining some global variables
 articles_list = []
 read_later = []
 MAX_ARTICLES = 5
 tickers = set()
+
+@app.route("/register", methods=["GET", "POST"])
+#"""Register user"""
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        if not username:
+           return ("Username not entered")
+
+        if not password:
+            return ("Password not entered")
+        if len(password) < 8 or password.isalpha():
+            return ("Password must be at least 8 characters and contain at least one number")
+
+        if password != confirmation:
+            return ("Passwords do not match")
+        
+        # Checks if username chosen is available
+
+        cur.execute("SELECT username FROM users")
+        taken_usernames = cur.fetchall()
+        taken_usernames_list = []
+        for index, x in enumerate(taken_usernames):
+            taken_usernames_list.append(x[0])
+
+        if username in taken_usernames_list:
+            return("Username already taken")
+        
+        sql = "INSERT INTO users (username, hash) VALUES (%s, %s)"
+        val = (username, generate_password_hash(password))
+        cur.execute(sql, val)
+        print(cur.rowcount, "record inserted.")
+        connection.commit()
+        cur.close()
+
+        return redirect("/")
+    else:
+        return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return ("must provide username")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return ("must provide password")
+
+        # Query database for username
+        cur.execute("SELECT * FROM users WHERE username = %s", (request.form.get('username'),))
+
+        # Stores details of user
+        usernames = cur.fetchall()
+        usernames_list = []
+        for index, x in enumerate(usernames):
+            temp_dict = {
+                "ID" : x[0],
+                "username" : x[1],
+                "hash" : x[2]
+            }
+            usernames_list.append(temp_dict.copy())
+
+        # Ensure username exists and password is correct
+        if len(usernames_list) != 1 or not check_password_hash(usernames_list[0]["hash"], request.form.get("password")):
+            return ("invalid username and/or password")
+
+        # Remember which user has logged in
+        session["user_id"] = usernames_list[0]["ID"]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
