@@ -1,0 +1,7 @@
+Flask
+Flask-Session
+bs4
+requests
+datetime
+pytz
+mysql.connector
