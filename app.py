@@ -1,3 +1,4 @@
+from os import read
 from bs4 import BeautifulSoup
 from random import shuffle
 from flask import Flask
@@ -41,14 +42,15 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Gets tickers held by user
 def get_tickers():
-     # Gets tickers held by user
         cur.execute("SELECT ticker FROM tickers WHERE user_id = %s", (session['user_id'],))
         results_temp = cur.fetchall()
         tckrs = []
         for index, result in enumerate(results_temp):
             tckrs.append(result[0])
         return tckrs
+
 # Make sure responses are not cached (from CS50 finance)
 @app.after_request
 def after_request(response):
@@ -66,7 +68,7 @@ Session(app)
 
 # Defining some global variables
 articles_list = []
-read_later = []
+# read_later = []
 MAX_ARTICLES = 5
 tickers = set()
 
@@ -160,7 +162,6 @@ def login():
 @login_required
 def index():
     if request.method == "GET":
-
         articles_list.clear()
         tickers = get_tickers()
         for ticker in tickers:
@@ -209,9 +210,14 @@ def index():
         article_number = int(request.form.get('article_id'))
         for article in articles_list:
             if article['id'] == article_number:
-                read_later.append(article)
+                
+                # Update saved article db
+                cur.execute("INSERT INTO saved(user_id, stock, title, a_description, a_source, link, article_id) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                (session['user_id'], article['stock'], article['title'], article['description'], article['source'], article['link'], article['id']))
+                connection.commit()
+                    
                 break
-        return redirect("/readlater")
+        return redirect("/saved")
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -237,20 +243,35 @@ def add():
         return render_template("add.html", tickers=get_tickers())
 
 
-@app.route("/readlater", methods=["POST","GET"])
+@app.route("/saved", methods=["POST","GET"])
 @login_required
-def readlater():
+def saved():
 
-    # Removes article from read later
+    # Removes article from saved
     if request.method=="POST":
         article_id = int(request.form.get("article_id"))
         for article in articles_list:
             if article['id'] == article_id:
-                read_later.remove(article)
+                # Removes article from saved db
+                cur.execute("DELETE FROM saved WHERE user_id = %s AND article_id = %s", (session['user_id'], article_id))
+                connection.commit()
                 break
-        return redirect("/readlater")
+        return redirect("/saved")
     else:
-        return render_template("readlater.html", read_later=read_later)
+        cur.execute("SELECT stock, title, a_description, a_source, link, article_id FROM saved WHERE user_id = %s", (session['user_id'],))
+        results_temp = cur.fetchall()
+        read_later = []
+        for index, result in enumerate(results_temp):
+            temp_dict = {
+                "stock":result[0],
+                "title":result[1],
+                "description":result[2],
+                "source":result[3],
+                "link":result[4],
+                "id": result[5]
+            }
+            read_later.append(temp_dict.copy())
+        return render_template("saved.html", read_later=read_later)
 
 @app.route("/logout")
 def logout():
