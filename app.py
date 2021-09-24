@@ -68,7 +68,6 @@ Session(app)
 
 # Defining some global variables
 articles_list = []
-# read_later = []
 MAX_ARTICLES = 5
 tickers = set()
 
@@ -107,6 +106,7 @@ def register():
         val = (username, generate_password_hash(password))
         cur.execute(sql, val)
         connection.commit()
+
         return redirect("/")
     else:
         return render_template("register.html")
@@ -210,12 +210,10 @@ def index():
         article_number = int(request.form.get('article_id'))
         for article in articles_list:
             if article['id'] == article_number:
-                
                 # Update saved article db
                 cur.execute("INSERT INTO saved(user_id, stock, title, a_description, a_source, link, article_id) VALUES(%s, %s, %s, %s, %s, %s, %s)",
                 (session['user_id'], article['stock'], article['title'], article['description'], article['source'], article['link'], article['id']))
-                connection.commit()
-                    
+                connection.commit()                    
                 break
         return redirect("/saved")
 
@@ -223,7 +221,6 @@ def index():
 @app.route("/add", methods=["GET", "POST"])
 @login_required
 def add():
-    
     # Adds users stock into feed
     if request.method == "POST" and request.form.get('stock_add'):
         stock = request.form.get('stock_add').upper()
@@ -231,13 +228,11 @@ def add():
             cur.execute("INSERT INTO tickers(user_id, ticker) VALUES(%s, %s)", (session['user_id'], stock))
             connection.commit()
         return redirect("/add")
-
+        # Removes users stock from feed
     elif request.method == "POST" and request.form.get('stock_removal'):
         stock = request.form.get('stock_removal').upper()
-
         cur.execute("DELETE FROM tickers WHERE user_id = %s and ticker = %s", (session['user_id'], stock))
         connection.commit()
-
         return redirect("/add")
     else:
         return render_template("add.html", tickers=get_tickers())
@@ -246,7 +241,6 @@ def add():
 @app.route("/saved", methods=["POST","GET"])
 @login_required
 def saved():
-
     # Removes article from saved
     if request.method=="POST":
         article_id = int(request.form.get("article_id"))
