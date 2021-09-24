@@ -1,0 +1,13 @@
+body {
+    background-color:#D3D4D9;
+}
+
+.sidebar {
+    background-color:black;
+    text-align: center;
+}
+
+.empty-portfolio {
+    text-align: center;
+    color: white;
+}

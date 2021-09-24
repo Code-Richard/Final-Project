@@ -3,14 +3,17 @@
 <html lang="en">
     <head>
         <title>News</title>
+
+        
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link href="/static/styles.css" rel="stylesheet">
     </head>
-    <body style="background-color:#1B2122;">
+    <body>
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -36,7 +39,7 @@
             </div>
         </nav>
         <div class="row">
-            <div class="container-fluid col-sm-3 justify-content-center p-3 text-white shadow min-vh-100" style="background-color:black; text-align: center;">
+            <div class="container-fluid col-sm-3 justify-content-center p-3 text-white shadow min-vh-100 sidebar">
                 <h2>My Portfolio</h2>
                 <div class="card-footer text-muted font-italic">Add or remove companies from the "stocks" tab</div>
                 <hr style="background-color: whitesmoke;">
@@ -70,7 +73,7 @@
                     {% endfor %}
                 {% else %}
                     <div class="container m-3">
-                        <div class="justify-content-center font-italic font-weight-lighter" style="text-align: center; color: white;">
+                        <div class="justify-content-center font-italic font-weight-lighter empty-portfolio">
                             Your Portfolio is empty - Add companies in the "stocks" tab
                         </div>
                     </div>
