@@ -30,7 +30,7 @@
                     <a class="nav-link" aria-current="page" href="/add">Stocks</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link active" href="/readlater">Read Later</a>
+                    <a class="nav-link active" href="/saved">Saved</a>
                   </li>
                 </ul>
               </div>
@@ -48,7 +48,7 @@
                         <p class="card-text">{{article['description']}}</p>
                         <div class="row justify-content-center">
                           <a href={{article['link']}} class="btn btn-outline-dark shadow m-2">Read Article</a>
-                          <form action="/readlater" method="POST">
+                          <form action="/saved" method="POST">
                               <button type="submit" name=article_id value={{article['id']}} class="btn btn-outline-dark shadow m-2">Remove</button>
                           </form>
                       </div>
