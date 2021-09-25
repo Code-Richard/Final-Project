@@ -1,5 +1,5 @@
 # NEWS TRACKER
-#### Video Demo:  <URL HERE>
+#### Video Demo:  https://youtu.be/Rqqc8ut3DLE
 #### Description:
 
 #### This web app allows you to create portfolio of companies that you would like to keep up to date on news from
