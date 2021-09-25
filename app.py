@@ -175,6 +175,12 @@ def index():
             # Finds articles in Yahoo Finance Page
             articles = doc.findAll(class_="js-stream-content Pos(r)")
 
+            # Removes invalid tickers from portfolio
+            if not articles:
+                cur.execute("DELETE FROM tickers WHERE user_id = %s and ticker = %s", (session['user_id'], ticker))
+                connection.commit()
+                break
+
             # Stores info about each article in articles_list
             for count, article in enumerate(articles, start=(len(articles_list))):
 
@@ -204,7 +210,7 @@ def index():
         #Randomises feed
         shuffle(articles_list)
 
-        return render_template("index.html", articles=articles_list, tickers=tickers)
+        return render_template("index.html", articles=articles_list, tickers=get_tickers())
     else:
         # Adds article to read_later list
         article_number = int(request.form.get('article_id'))
