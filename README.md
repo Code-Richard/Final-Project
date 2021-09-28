@@ -1,4 +1,4 @@
-# NEWS TRACKER
+# NEWSCRAPER
 #### Video Demo:  https://youtu.be/Rqqc8ut3DLE
 #### Description:
 
